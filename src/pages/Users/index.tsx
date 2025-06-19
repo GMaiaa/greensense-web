@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   UsersContainer,
   UsersHeader,
   UsersTable,
   UsersActions,
-  UsersButton,
   SearchInput,
   Input,
   Label,
@@ -25,7 +24,7 @@ type User = {
   username: string;
   email: string;
   telefone: string;
-  categoria: 'Operacional';
+  categoria: string;
 };
 
 // Função para gerar senha aleatória
@@ -48,10 +47,35 @@ const Users: React.FC = () => {
   const [telefone, setTelefone] = useState('');
   const [open, setOpen] = useState(false);
 
+  // 🔥 Buscar usuários da API ao abrir a página
+  const fetchUsers = async () => {
+    try {
+      const data = await authService.listUsers();
+      const usersFromApi = data.map((user: any) => ({
+        id: user.id,
+        username: user.username,
+        email: user.email || 'Não informado',
+        telefone: user.telefone || 'Não informado',
+        categoria: user.role === 'ROLE_ADMIN' ? 'Admin' : 'Operacional',
+      }));
+      setUsers(usersFromApi);
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error);
+      Swal.fire('Erro', 'Erro ao buscar usuários', 'error');
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // 🔥 Cadastrar usuário operacional
   const handleCadastrar = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const senhaGerada = gerarSenha(8);
+
+    console.log(senhaGerada)
 
     try {
       await authService.register({
@@ -60,37 +84,28 @@ const Users: React.FC = () => {
         role: 'OPERACIONAL',
       });
 
-      const newUser: User = {
-        id: crypto.randomUUID(),
-        username,
-        email,
-        telefone,
-        categoria: 'Operacional',
-      };
-
-      setUsers((prev) => [...prev, newUser]);
-
-      setUsername('');
-      setEmail('');
-      setTelefone('');
-      setOpen(false);
-
       await Swal.fire({
         icon: 'success',
         title: '<span style="font-family: Inter, sans-serif;">Usuário cadastrado com sucesso!</span>',
         html: `
           <div style="text-align: left; font-family: Inter, sans-serif;">
-            <p><strong>Username:</strong> ${newUser.username}</p>
-            <p><strong>Email:</strong> ${newUser.email}</p>
-            <p><strong>Telefone:</strong> ${newUser.telefone}</p>
+            <p><strong>Username:</strong> ${username}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Telefone:</strong> ${telefone}</p>
             <p>Os dados de acesso foram enviados por email.</p>
           </div>
         `,
         confirmButtonColor: '#44AA00',
         confirmButtonText: 'Fechar',
       });
-      
-      
+
+      setUsername('');
+      setEmail('');
+      setTelefone('');
+      setOpen(false);
+
+      // Atualiza lista de usuários após cadastro
+      fetchUsers();
 
     } catch (error) {
       console.error('Erro ao cadastrar usuário:', error);
