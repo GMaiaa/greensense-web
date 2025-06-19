@@ -1,42 +1,48 @@
 import api from './api';
 
-export interface Notification {
+export interface Usuario {
+  id: string;
+  username: string;
+  senha?: string;
+  role: string;
+}
+
+export interface Notificacao {
   id: string;
   titulo: string;
   mensagem: string;
   tipo: string;
   lida: boolean;
   dataCriacao: string;
-  destinatario: string;
+  destinatario: string | Usuario; // <- O destinatário pode ser um string (ID) ou o objeto Usuario
 }
 
 export const notificationsService = {
-  listar: async (): Promise<Notification[]> => {
+  listar: async (): Promise<Notificacao[]> => {
     const response = await api.get('/notificacoes');
     return response.data;
   },
 
-  marcarComoLida: async (id: string): Promise<Notification> => {
-    const response = await api.patch(`/notificacoes/${id}/ler`);
-    return response.data;
-  },
-
-  buscarPorId: async (id: string): Promise<Notification> => {
+  buscarPorId: async (id: string): Promise<Notificacao> => {
     const response = await api.get(`/notificacoes/${id}`);
     return response.data;
   },
 
-  excluir: async (id: string) => {
-    await api.delete(`/notificacoes/${id}`);
-  },
-
-  criar: async (notification: Omit<Notification, 'id' | 'dataCriacao'>): Promise<Notification> => {
-    const response = await api.post('/notificacoes', notification);
+  criar: async (notificacao: Omit<Notificacao, 'id' | 'lida' | 'dataCriacao'>) => {
+    const response = await api.post('/notificacoes', notificacao);
     return response.data;
   },
 
-//   editar: async (id: string, notification: Partial<Omit<Notification, 'id' | 'dataCriacao'>>): Promise<Notification> => {
-//     const response = await api.put(`/notificacoes/${id}`, notification);
-//     return response.data;
-//   },
-}; 
+  atualizar: async (id: string, notificacao: Omit<Notificacao, 'id' | 'lida' | 'dataCriacao'>) => {
+    const response = await api.put(`/notificacoes/${id}`, notificacao);
+    return response.data;
+  },
+
+  marcarComoLida: async (id: string) => {
+    await api.patch(`/notificacoes/${id}/ler`);
+  },
+
+  deletar: async (id: string) => {
+    await api.delete(`/notificacoes/${id}`);
+  },
+};

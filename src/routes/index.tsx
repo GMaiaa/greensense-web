@@ -4,8 +4,9 @@ import Dashboard from "../pages/Dashboard";
 import Trash from "../pages/Trash";
 import Users from "../pages/Users";
 import Profile from "../pages/Profile";
-import AllNotifications from '../pages/AllNotifications';
+import Notifications from '../pages/AllNotifications';
 import { PrivateRoute } from "./privateRoutes";
+import Revisoes from "@pages/Revisoes";
 
 export default function AppRoutes() {
   return (
@@ -51,7 +52,15 @@ export default function AppRoutes() {
           path="/notifications"
           element={
             <PrivateRoute>
-              <AllNotifications />
+              <Notifications />
+            </PrivateRoute>
+          }
+        />
+         <Route
+          path="/revisoes"
+          element={
+            <PrivateRoute>
+              <Revisoes />
             </PrivateRoute>
           }
         />
