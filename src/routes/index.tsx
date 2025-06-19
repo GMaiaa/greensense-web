@@ -4,6 +4,7 @@ import Dashboard from "../pages/Dashboard";
 import Trash from "../pages/Trash";
 import Users from "../pages/Users";
 import Profile from "../pages/Profile";
+import AllNotifications from '../pages/AllNotifications';
 import { PrivateRoute } from "./privateRoutes";
 
 export default function AppRoutes() {
@@ -43,6 +44,14 @@ export default function AppRoutes() {
           element={
             <PrivateRoute>
               <Profile />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <PrivateRoute>
+              <AllNotifications />
             </PrivateRoute>
           }
         />

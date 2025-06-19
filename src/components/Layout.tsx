@@ -13,12 +13,24 @@ import {
   NotificationsModal
 } from './styles';
 
-import { useState } from 'react';
+type Notifications = {
+  id: string;
+  titulo: string;
+  mensagem: string;
+  tipo: string;
+  lida: boolean;
+  dataCriacao: string;
+  destinatario: string;
+};
+
+import { useEffect, useState } from 'react';
 
 export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Notifications[]>([]);
+  const [loadingNotificacoes, setLoadingNotificacoes] = useState(true);
 
   const currentPath = location.pathname;
 
@@ -26,6 +38,17 @@ export default function Layout() {
     navigate('/login');
     localStorage.removeItem('token');
   };
+
+  useEffect(() => {
+    import('../services/notificationsService').then(({ notificationsService }) => {
+      notificationsService.listar()
+        .then(data => {
+          setNotifications(data);
+          setLoadingNotificacoes(false);
+        })
+        .catch(() => setLoadingNotificacoes(false));
+    });
+  }, []);
 
   return (
     <Container>
@@ -61,11 +84,21 @@ export default function Layout() {
                 <NotificationsModal>
                   <div className="arrow" />
                   <div className="title">Notificações</div>
-                  <div className="notification">
-                    Caçamba #cb00644 está com nível alto de lixo.
-                  </div>
+                  {loadingNotificacoes ? (
+                    <div className="notification">Carregando...</div>
+                  ) : notifications.length === 0 ? (
+                    <div className="notification">Nenhuma notificação encontrada.</div>
+                  ) : (
+                    notifications.map((n) => (
+                      <div key={n.id} className="notification" style={{ marginBottom: 8 }}>
+                        <strong>{n.titulo}</strong>
+                        <div>{n.mensagem}</div>
+                        <small>Destinatário: {n.destinatario}</small>
+                      </div>
+                    ))
+                  )}
                   <div className="divider" />
-                  <button className="see-all">Ver Todas</button>
+                  <button className="see-all" onClick={() => navigate('/notifications')}>Ver Todas</button>
                 </NotificationsModal>
               )}
             </div>
